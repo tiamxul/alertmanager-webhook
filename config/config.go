@@ -13,7 +13,7 @@ var Config *model.Config
 
 func init() {
 	fmt.Println("####init")
-	filename := "config.yaml"
+	filename := "./config/config.yaml"
 	data, err := os.ReadFile(filename)
 	if err != nil {
 		log.Fatal(err)
