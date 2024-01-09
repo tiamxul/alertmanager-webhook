@@ -8,6 +8,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/tiamxu/alertmanager-webhook/config"
 	"github.com/tiamxu/alertmanager-webhook/log"
 	"github.com/tiamxu/alertmanager-webhook/model"
 )
@@ -132,7 +133,9 @@ func PrometheusAlert(c *gin.Context) {
 	for _, alert := range notification.Alerts {
 		fstext = fstext + "####[摘要]:" + alert.Annotations["summary"] + "\n" + "####[详情:]" + alert.Annotations["description"] + "\n"
 	}
-	var open string = "1"
+	// var open string = "1"
+	open := config.Config.OpenFeishu
+	fmt.Println("###open:", open)
 	PostToFS(fstext, LARK_URL, open)
 	//PostToFeiShu(fstext, LARK_URL)
 }

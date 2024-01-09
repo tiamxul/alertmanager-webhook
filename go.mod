@@ -38,11 +38,3 @@ require (
 	google.golang.org/protobuf v1.30.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
-
-replace github.com/tiamxu/alertmanager-webhook/controller => ./controller
-
-replace github.com/tiamxu/alertmanager-webhook/log => ./log
-
-replace github.com/tiamxu/alertmanager-webhook/model => ../model
-
-replace github.com/tiamxu/alertmanager-webhook/config => ./config
