@@ -1,0 +1,14 @@
+env: dev
+log_level: info
+listen_address: :8800
+#热更新配置文件
+hot_reload: true
+alert_type: dingding
+#---------------------↓webhook-----------------------
+open_dingding: 0
+dingding:
+  dd_url: https://oapi.dingtalk.com/robot/send?access_token=xxxxx
+#是否开启飞书告警通道,可同时开始多个通道0为关闭,1为开启
+open_feishu: 1
+feishu:
+  fs_url: https://open.feishu.cn/open-apis/bot/v2/hook/bf8bb912-bc2e-40ad-9533-fcb8068aa621
