@@ -1,0 +1,19 @@
+{{/* 这是一个简单的告警通知模板 */}}
+
+*Alert Summary:*
+
+- **Status:** {{ .Status }}
+- **Starts At:** {{ .StartsAt.Format "2006-01-02 15:04:05" }}
+{{ if ne .EndsAt.IsZero }} - **Ends At:** {{ .EndsAt.Format "2006-01-02 15:04:05" }}{{ end }}
+
+*Labels:*
+{{ range $key, $value := .Labels }}
+- **{{$key}}:** {{$value}}
+{{ end }}
+
+*Annotations:*
+{{ range $key, $value := .Annotations }}
+- **{{$key}}:** {{$value}}
+{{ end }}
+
+*Generator URL:* [Link]({{.GeneratorURL}})

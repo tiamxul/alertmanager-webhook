@@ -1,20 +1,18 @@
 package model
 
-// 定义钉钉消息类型
-
-type At struct {
-	AtMobiles []string `json:"atMobiles"`
-	IsAtAll   bool     `json:"isAtAll"`
+type DDMessage struct {
+	Msgtype  string `json:"msgtype"`
+	Markdown Md     `json:"markdown,omitempty"`
 }
+
 type Md struct {
 	Title string `json:"title"`
 	Text  string `json:"text"`
 }
 
-type DDMessage struct {
-	Msgtype  string `json:"msgtype"`
-	Markdown Md     `json:"markdown"`
-	At       At     `json:"at"`
+type At struct {
+	IsAtAll   bool     `json:"isAtAll"`
+	AtMobiles []string `json:"atMobiles,omitempty"`
 }
 
 // {

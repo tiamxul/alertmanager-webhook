@@ -1,9 +1,10 @@
 package main
 
 import (
+	"alertmanager-webhook/log"
+
 	"github.com/koding/multiconfig"
 	"github.com/sirupsen/logrus"
-	"github.com/tiamxu/alertmanager-webhook/log"
 )
 
 type Config struct {

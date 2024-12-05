@@ -1,27 +1,52 @@
 package config
 
 import (
-	"fmt"
-	"log"
 	"os"
 
-	"github.com/tiamxu/alertmanager-webhook/model"
 	"gopkg.in/yaml.v3"
 )
 
-var Config *model.Config
+type Config struct {
+	Env           string           `yaml:"env"`
+	LogLevel      string           `yaml:"log_level"`
+	ListenAddress string           `yaml:"listen_address"`
+	HotReload     bool             `yaml:"hot_reload"`
+	AlertType     string           `yaml:"alert_type"`
+	Dingtalk      DingtalkConfig   `yaml:"dingtalk"`
+	OpenFeishu    int              `yaml:"open_feishu"`
+	FeishuRobots  []RobotConfig    `yaml:"feishu_robots"`
+	Templates     []TemplateConfig `yaml:"templates"`
+}
 
-func init() {
-	fmt.Println("####init")
-	filename := "./config/config.yaml"
+type DingtalkConfig struct {
+	Open       int    `yaml:"open_dingtalk"`
+	WebhookURL string `yaml:"webhook_url"`
+}
+
+type RobotConfig struct {
+	Name       string `yaml:"name"`
+	WebhookURL string `yaml:"webhook_url"`
+}
+
+type TemplateConfig struct {
+	Name string `yaml:"name"`
+	Path string `yaml:"path"`
+}
+
+var AppConfig *Config
+
+func Load() error {
+	filename := "./config/default.yaml"
 	data, err := os.ReadFile(filename)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
-	fmt.Printf("yaml文件内容:\n%v\n", string(data))
-	err = yaml.Unmarshal(data, &Config)
+
+	AppConfig = &Config{}
+	err = yaml.Unmarshal(data, AppConfig)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
-	fmt.Printf("%+v\n", Config)
+
+	return nil
 }
