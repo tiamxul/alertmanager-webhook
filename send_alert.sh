@@ -124,4 +124,4 @@ alerts_message='
 }
 '
 
-curl -XPOST -d"$alerts_message" http://localhost:8800/feishu
+curl -XPOST -d"$alerts_message" http://localhost:8800/webhook

@@ -1,0 +1,25 @@
+# 告警通知
+
+{{ range .Alerts }}
+状态: {{ .Status }}
+
+开始时间: {{ .StartsAt.Format "2006-01-02 15:04:05" }}
+
+{{ if not .EndsAt.IsZero }}
+结束时间: {{ .EndsAt.Format "2006-01-02 15:04:05" }}
+{{ end }}
+
+## 标签
+
+{{ range $key, $value := .Labels }}
+- **{{$key}}:** {{$value}}
+{{ end }}
+
+## 注解
+
+{{ range $key, $value := .Annotations }}
+- **{{$key}}:** {{$value}}
+{{ end }}
+
+[点击访问告警详情]({{.GeneratorURL}})
+{{ end }}
