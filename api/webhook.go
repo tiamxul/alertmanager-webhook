@@ -1,8 +1,8 @@
 package controllers
 
 import (
-	"fmt"
 	"net/http"
+	"net/url"
 	"path/filepath"
 
 	"github.com/gin-gonic/gin"
@@ -21,8 +21,14 @@ func HandlerWebhook(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	//log.Infof("###收到alertmanager告警:%s", notification)
-	templateName := notification.GetTemplateName()
+	webhookType := c.Query("type")
+	templateName := c.Query("tpl")
+	fsURL := c.Query("fsurl")
+	if webhookType != "fs" || templateName == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid or missing parameters"})
+		return
+	}
+	// templateName := notification.GetTemplateName()
 	templateFile := filepath.Join("templates", templateName+".tmpl")
 	alertTemplate, err := model.NewTemplate(templateFile)
 	if err != nil {
@@ -38,24 +44,33 @@ func HandlerWebhook(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "template execution failed"})
 		return
 	}
-	fmt.Printf("messageContent:%s\n", messageContent)
-	for i := range notification.Alerts {
-		notification.Alerts[i].Annotations["text"] = messageContent
-	}
-	commonMsg := &model.CommonMessage{
-		Platform: config.AppConfig.AlertType,
-		// Title:    notification.GroupLabels["alertname"],
-		Text: messageContent,
-	}
-
-	sender := getSender(commonMsg)
-	//fmt.Println(msg)
-	if sender == nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "unsupported platform"})
-		log.Infof("getSender:%s", err)
-
+	parsedURL, err := url.Parse(fsURL)
+	if err != nil {
+		log.Errorf("Failed to parse FeiShu webhook URL: %v", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid fsurl parameter"})
 		return
 	}
+	// for i := range notification.Alerts {
+	// 	notification.Alerts[i].Annotations["text"] = messageContent
+	// }
+	commonMsg := &model.CommonMessage{
+		Platform: config.AppConfig.AlertType,
+		Title:    notification.GroupLabels["alertname"],
+		Text:     messageContent,
+	}
+
+	// sender := getSender(commonMsg)
+	sender := &feishu.FeiShuSender{
+		Name:       "robot1",
+		WebhookURL: parsedURL.String(),
+	}
+	//fmt.Println(msg)
+	// if sender == nil {
+	// 	c.JSON(http.StatusBadRequest, gin.H{"error": "unsupported platform"})
+	// 	log.Infof("getSender:%s", err)
+
+	// 	return
+	// }
 
 	err = sender.Send(commonMsg)
 	if err != nil {

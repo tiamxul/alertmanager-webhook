@@ -1,25 +1,20 @@
-# 告警通知
-
-{{ range .Alerts }}
-状态: {{ .Status }}
-
-开始时间: {{ .StartsAt.Format "2006-01-02 15:04:05" }}
-
-{{ if not .EndsAt.IsZero }}
-结束时间: {{ .EndsAt.Format "2006-01-02 15:04:05" }}
+{{ $var := .ExternalURL }}
+{{ range $k, $v := .Alerts }}
+{{ if eq $v.Status "resolved" }}
+## [Prometheus恢复信息]
+#### [{{$v.Labels.alertname}}]({{$var}})
+###### 告警级别：{{$v.Labels.level}}
+###### 开始时间：{{ $v.StartsAt.Format "2006-01-02 15:04:05" }}
+###### 结束时间：{{ $v.EndsAt.Format "2006-01-02 15:04:05" }}
+###### 故障主机IP：{{$v.Labels.instance}}
+##### {{$v.Annotations.description}}
+{{ else }}
+## [Prometheus告警信息]
+#### [{{$v.Labels.alertname}}]({{$var}})
+###### 告警级别：{{$v.Labels.level}}
+###### 开始时间：{{ $v.StartsAt.Format "2006-01-02 15:04:05" }}
+###### 结束时间：{{ $v.EndsAt.Format "2006-01-02 15:04:05" }}
+###### 故障主机IP：{{$v.Labels.instance}}
+##### {{$v.Annotations.description}}
 {{ end }}
-
-## 标签
-
-{{ range $key, $value := .Labels }}
-- **{{$key}}:** {{$value}}
-{{ end }}
-
-## 注解
-
-{{ range $key, $value := .Annotations }}
-- **{{$key}}:** {{$value}}
-{{ end }}
-
-[点击访问告警详情]({{.GeneratorURL}})
 {{ end }}

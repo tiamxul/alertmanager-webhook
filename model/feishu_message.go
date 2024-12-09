@@ -39,7 +39,7 @@ type PostMessageContent struct {
 	Post PostMessageContentPost `json:"post"`
 }
 
-type 	PostMessageContentPost struct {
+type PostMessageContentPost struct {
 	ZhCn PostMessageContentPostZhCn `json:"zh-CN"`
 }
 
@@ -82,6 +82,60 @@ func NewPostMessage(title string, content [][]PostMessageContentPostZhCnContent)
 					Content: content,
 				},
 			},
+		},
+	}
+}
+
+// InteractiveMessage 消息卡片
+type InteractiveMessage struct {
+	MsgType MsgType                `json:"msg_type"`
+	Card    InteractiveMessageCard `json:"card"`
+}
+
+type InteractiveMessageCard struct {
+	Elements InteractiveMessageCardElements `json:"elements"`
+	Header   InteractiveMessageCardHeader   `json:"header"`
+}
+
+type InteractiveMessageCardElements []struct {
+	Tag     string                                `json:"tag"`
+	Text    InteractiveMessageCardElementsText    `json:"text,omitempty"`
+	Actions InteractiveMessageCardElementsActions `json:"actions,omitempty"`
+}
+
+type InteractiveMessageCardElementsText struct {
+	Content string `json:"content"`
+	Tag     string `json:"tag"`
+}
+
+type InteractiveMessageCardElementsActions []struct {
+	Tag   string                                    `json:"tag"`
+	Text  InteractiveMessageCardElementsActionsText `json:"text"`
+	Url   string                                    `json:"url"`
+	Type  string                                    `json:"type"`
+	Value struct {
+	} `json:"value"`
+}
+
+type InteractiveMessageCardElementsActionsText struct {
+	Content string `json:"content"`
+	Tag     string `json:"tag"`
+}
+
+type InteractiveMessageCardHeader struct {
+	Title InteractiveMessageCardHeaderTitle `json:"title"`
+}
+type InteractiveMessageCardHeaderTitle struct {
+	Content string `json:"content"`
+	Tag     string `json:"tag"`
+}
+
+func NewInteractiveMessage(elements InteractiveMessageCardElements, header InteractiveMessageCardHeader) *InteractiveMessage {
+	return &InteractiveMessage{
+		MsgType: MsgTypeInteractive,
+		Card: InteractiveMessageCard{
+			Elements: elements,
+			Header:   header,
 		},
 	}
 }

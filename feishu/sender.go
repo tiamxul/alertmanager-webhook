@@ -26,7 +26,7 @@ func (f *FeiShuSender) Send(message *model.CommonMessage) error {
 	} else {
 		content := [][]model.PostMessageContentPostZhCnContent{
 			{
-				*model.NewPostMessageContentPostZhCnContent("text", message.Text, "", "", "", "", "", ""),
+				*model.NewPostMessageContentPostZhCnContent("markdown", message.Text, "", "", "", "", "", ""),
 			},
 			{
 				*model.NewPostMessageContentPostZhCnContent("a", "点击查看", "http://www.baidu.com", "", "", "", "", ""),
