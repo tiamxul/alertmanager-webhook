@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"encoding/json"
 	"net/http"
 	"net/url"
 	"path/filepath"
@@ -13,6 +14,13 @@ import (
 	"github.com/tiamxu/alertmanager-webhook/log"
 	"github.com/tiamxu/alertmanager-webhook/model"
 )
+
+type FeiShuMessage struct {
+	MsgType string `json:"msg_type"`
+	Content struct {
+		Text string `json:"text"`
+	} `json:"content"`
+}
 
 func HandlerWebhook(c *gin.Context) {
 	var notification model.AlertMessage
@@ -44,6 +52,31 @@ func HandlerWebhook(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "template execution failed"})
 		return
 	}
+	// 构造 JSON 请求体
+	feishuMessage := map[string]interface{}{
+		"msg_type": "post",
+		"content": map[string]interface{}{
+			"post": map[string]interface{}{
+				"zh_cn": map[string]interface{}{
+					"title": "Prometheus Alert",
+					"content": [][]map[string]interface{}{
+						{
+							{
+								"tag":  "text",
+								"text": messageContent,
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+	jsonPayload, err := json.Marshal(feishuMessage)
+	if err != nil {
+		log.Errorf("Failed to marshal JSON payload: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to marshal JSON"})
+		return
+	}
 	parsedURL, err := url.Parse(fsURL)
 	if err != nil {
 		log.Errorf("Failed to parse FeiShu webhook URL: %v", err)
@@ -53,12 +86,16 @@ func HandlerWebhook(c *gin.Context) {
 	// for i := range notification.Alerts {
 	// 	notification.Alerts[i].Annotations["text"] = messageContent
 	// }
+	// commonMsg := &model.CommonMessage{
+	// 	Platform: config.AppConfig.AlertType,
+	// 	Title:    notification.GroupLabels["alertname"],
+	// 	Text:     messageContent,
+	// }
 	commonMsg := &model.CommonMessage{
+		Text: string(jsonPayload),
+		// Title:    notification.GroupLabels["alertname"],
 		Platform: config.AppConfig.AlertType,
-		Title:    notification.GroupLabels["alertname"],
-		Text:     messageContent,
 	}
-
 	// sender := getSender(commonMsg)
 	sender := &feishu.FeiShuSender{
 		Name:       "robot1",

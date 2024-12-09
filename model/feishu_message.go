@@ -8,6 +8,7 @@ const (
 	MsgTypeImage       MsgType = "image"
 	MsgTypeShareChat   MsgType = "share_chat"
 	MsgTypeInteractive MsgType = "interactive"
+	MsgMarkDown        MsgType = "markdown"
 )
 
 // 简单文本消息

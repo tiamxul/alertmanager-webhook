@@ -11,6 +11,13 @@ import (
 	"github.com/tiamxu/alertmanager-webhook/model"
 )
 
+type FeiShuMessage struct {
+	MsgType string `json:"msg_type"`
+	Content struct {
+		Text string `json:"text"`
+	} `json:"content"`
+}
+
 type FeiShuSender struct {
 	Name       string
 	WebhookURL string
@@ -28,9 +35,9 @@ func (f *FeiShuSender) Send(message *model.CommonMessage) error {
 			{
 				*model.NewPostMessageContentPostZhCnContent("markdown", message.Text, "", "", "", "", "", ""),
 			},
-			{
-				*model.NewPostMessageContentPostZhCnContent("a", "点击查看", "http://www.baidu.com", "", "", "", "", ""),
-			},
+			// {
+			// 	*model.NewPostMessageContentPostZhCnContent("a", "点击查看", "http://www.baidu.com", "", "", "", "", ""),
+			// },
 		}
 		msg = model.NewPostMessage(message.Title, content)
 	}
