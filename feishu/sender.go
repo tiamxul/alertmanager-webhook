@@ -59,12 +59,17 @@ func (f *FeiShuSender) Send(message *model.CommonMessage) error {
 		return fmt.Errorf("invalid platform for FeiShuSender")
 	}
 	var msg interface{}
-	elements := model.InteractiveMessageCardElements{{
-		Tag: "markdown",
-		Text: model.InteractiveMessageCardElementsText{
+	elements := model.InteractiveMessageCardElements{
+		{
+			Tag:     "markdown",
 			Content: message.Text,
+			// Content: "# 一级标题\n## 二级标题\n### 三级标题\n#### 四级标题\n##### 五级标题\n###### 六级标题",
 		},
-	}}
+		{
+			Tag: "hr",
+		},
+	}
+
 	headers := model.InteractiveMessageCardHeader{
 		Title: model.InteractiveMessageCardHeaderTitle{
 			Content: "测试告警",
@@ -72,11 +77,11 @@ func (f *FeiShuSender) Send(message *model.CommonMessage) error {
 		},
 	}
 	msg = model.NewInteractiveMessage(elements, headers)
-	fmt.Printf("msg###:%v\n", msg)
 	payload, err := json.Marshal(msg)
 	if err != nil {
 		return err
 	}
+	fmt.Printf("payload:%s\n", string(payload))
 	resp, err := http.Post(f.WebhookURL, "application/json", bytes.NewBuffer(payload))
 	if err != nil {
 		log.Errorln("[feishu]", err.Error())

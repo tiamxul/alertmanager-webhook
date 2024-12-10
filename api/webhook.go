@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"net/http"
 	"net/url"
 	"path/filepath"
@@ -27,7 +26,8 @@ func HandlerWebhook(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid or missing parameters"})
 		return
 	}
-	// templateName := notification.GetTemplateName()
+
+	// // templateName := notification.GetTemplateName()
 	templateFile := filepath.Join("templates", templateName+".tmpl")
 	alertTemplate, err := model.NewTemplate(templateFile)
 	if err != nil {
@@ -37,7 +37,7 @@ func HandlerWebhook(c *gin.Context) {
 	}
 	notification.SetTemplate(alertTemplate)
 	messageContent, err := notification.Template.Execute(notification)
-	fmt.Printf("messageContent:%s\n", messageContent)
+	// fmt.Printf("messageContent:%s\n", messageContent)
 	// messageContext, err := alertTemplate.Execute(notification)
 	if err != nil {
 		log.Errorf("Failed to execute template: %v", err)
@@ -54,26 +54,22 @@ func HandlerWebhook(c *gin.Context) {
 	// for i := range notification.Alerts {
 	// 	notification.Alerts[i].Annotations["text"] = messageContent
 	// }
+
 	commonMsg := &model.CommonMessage{
 		Platform: config.AppConfig.AlertType,
 		// Title:    notification.GroupLabels["alertname"],
 		Text: messageContent,
 	}
-	// commonMsg := &model.CommonMessage{
-	// 	Text: string(jsonPayload),
-	// 	// Title:    notification.GroupLabels["alertname"],
-	// 	Platform: config.AppConfig.AlertType,
-	// }
-	// sender := getSender(commonMsg)
+
 	sender := &feishu.FeiShuSender{
 		Name:       "robot1",
 		WebhookURL: parsedURL.String(),
 	}
+	// sender := getSender(commonMsg)
 	//fmt.Println(msg)
 	// if sender == nil {
 	// 	c.JSON(http.StatusBadRequest, gin.H{"error": "unsupported platform"})
 	// 	log.Infof("getSender:%s", err)
-
 	// 	return
 	// }
 
