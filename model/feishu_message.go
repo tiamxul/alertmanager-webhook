@@ -95,7 +95,7 @@ type InteractiveMessage struct {
 
 type InteractiveMessageCard struct {
 	Elements InteractiveMessageCardElements `json:"elements"`
-	Header   InteractiveMessageCardHeader   `json:"header"`
+	Header   InteractiveMessageCardHeader   `json:"header,omitempty"`
 }
 
 type InteractiveMessageCardElements []struct {
@@ -106,7 +106,7 @@ type InteractiveMessageCardElements []struct {
 
 type InteractiveMessageCardElementsText struct {
 	Content string `json:"content"`
-	Tag     string `json:"tag"`
+	Tag     string `json:"tag,omitempty"`
 }
 
 type InteractiveMessageCardElementsActions []struct {

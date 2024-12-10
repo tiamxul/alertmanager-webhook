@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
 	"net/url"
 	"path/filepath"
@@ -11,13 +12,6 @@ import (
 	"github.com/tiamxu/alertmanager-webhook/log"
 	"github.com/tiamxu/alertmanager-webhook/model"
 )
-
-type FeiShuMessage struct {
-	MsgType string `json:"msg_type"`
-	Content struct {
-		Text string `json:"text"`
-	} `json:"content"`
-}
 
 func HandlerWebhook(c *gin.Context) {
 	var notification model.AlertMessage
@@ -43,6 +37,7 @@ func HandlerWebhook(c *gin.Context) {
 	}
 	notification.SetTemplate(alertTemplate)
 	messageContent, err := notification.Template.Execute(notification)
+	fmt.Printf("messageContent:%s\n", messageContent)
 	// messageContext, err := alertTemplate.Execute(notification)
 	if err != nil {
 		log.Errorf("Failed to execute template: %v", err)
@@ -61,8 +56,8 @@ func HandlerWebhook(c *gin.Context) {
 	// }
 	commonMsg := &model.CommonMessage{
 		Platform: config.AppConfig.AlertType,
-		Title:    notification.GroupLabels["alertname"],
-		Text:     messageContent,
+		// Title:    notification.GroupLabels["alertname"],
+		Text: messageContent,
 	}
 	// commonMsg := &model.CommonMessage{
 	// 	Text: string(jsonPayload),
