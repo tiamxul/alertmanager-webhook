@@ -1,16 +1,13 @@
 package controllers
 
 import (
-	"encoding/json"
 	"net/http"
 	"net/url"
 	"path/filepath"
 
 	"github.com/gin-gonic/gin"
 	"github.com/tiamxu/alertmanager-webhook/config"
-	"github.com/tiamxu/alertmanager-webhook/dingtalk"
 	"github.com/tiamxu/alertmanager-webhook/feishu"
-	"github.com/tiamxu/alertmanager-webhook/interfaces"
 	"github.com/tiamxu/alertmanager-webhook/log"
 	"github.com/tiamxu/alertmanager-webhook/model"
 )
@@ -52,31 +49,7 @@ func HandlerWebhook(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "template execution failed"})
 		return
 	}
-	// 构造 JSON 请求体
-	feishuMessage := map[string]interface{}{
-		"msg_type": "post",
-		"content": map[string]interface{}{
-			"post": map[string]interface{}{
-				"zh_cn": map[string]interface{}{
-					"title": "Prometheus Alert",
-					"content": [][]map[string]interface{}{
-						{
-							{
-								"tag":  "text",
-								"text": messageContent,
-							},
-						},
-					},
-				},
-			},
-		},
-	}
-	jsonPayload, err := json.Marshal(feishuMessage)
-	if err != nil {
-		log.Errorf("Failed to marshal JSON payload: %v", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to marshal JSON"})
-		return
-	}
+
 	parsedURL, err := url.Parse(fsURL)
 	if err != nil {
 		log.Errorf("Failed to parse FeiShu webhook URL: %v", err)
@@ -86,16 +59,16 @@ func HandlerWebhook(c *gin.Context) {
 	// for i := range notification.Alerts {
 	// 	notification.Alerts[i].Annotations["text"] = messageContent
 	// }
-	// commonMsg := &model.CommonMessage{
-	// 	Platform: config.AppConfig.AlertType,
-	// 	Title:    notification.GroupLabels["alertname"],
-	// 	Text:     messageContent,
-	// }
 	commonMsg := &model.CommonMessage{
-		Text: string(jsonPayload),
-		// Title:    notification.GroupLabels["alertname"],
 		Platform: config.AppConfig.AlertType,
+		Title:    notification.GroupLabels["alertname"],
+		Text:     messageContent,
 	}
+	// commonMsg := &model.CommonMessage{
+	// 	Text: string(jsonPayload),
+	// 	// Title:    notification.GroupLabels["alertname"],
+	// 	Platform: config.AppConfig.AlertType,
+	// }
 	// sender := getSender(commonMsg)
 	sender := &feishu.FeiShuSender{
 		Name:       "robot1",
@@ -118,33 +91,29 @@ func HandlerWebhook(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "successful send alert notification!"})
 }
 
-func getSender(notification *model.CommonMessage) interfaces.MessageSender {
-	log.Infof("Attempting to get sender for platform: %s", notification.Platform)
-	switch notification.Platform {
-	case "dingtalk":
-		if config.AppConfig.OpenDingding == 1 {
-			return &dingtalk.DingTalkSender{WebhookURL: config.AppConfig.Dingtalk.WebhookURL}
-		}
-	case "feishu":
-		if config.AppConfig.OpenFeishu == 1 {
-			return &feishu.FeiShuSender{WebhookURL: config.AppConfig.Feishu.WebhookURL}
-
-		}
-	default:
-		log.Warnf("Unsupported platform specified: %s", notification.Platform)
-	}
-
-	return nil
-}
+// func getSender(notification *model.CommonMessage) interfaces.MessageSender {
+// 	log.Infof("Attempting to get sender for platform: %s", notification.Platform)
+// 	switch notification.Platform {
+// 	case "dingtalk":
+// 		if config.AppConfig.OpenDingding == 1 {
+// 			return &dingtalk.DingTalkSender{WebhookURL: config.AppConfig.Dingtalk.WebhookURL}
+// 		}
+// 	case "feishu":
+// 		if config.AppConfig.OpenFeishu == 1 {
+// 			return &feishu.FeiShuSender{WebhookURL: config.AppConfig.Feishu.WebhookURL}
+// 		}
+// 	default:
+// 		log.Warnf("Unsupported platform specified: %s", notification.Platform)
+// 	}
+// 	return nil
+// }
 
 // func buildMessageText(notification model.AlertMessage) string {
 // 	var buffer strings.Builder
 // 	buffer.WriteString(fmt.Sprintf("通知组%s,状态[%s]\n告警项\n\n", notification.GroupKey, notification.Status))
-
 // 	for _, alert := range notification.Alerts {
 // 		buffer.WriteString(fmt.Sprintf("摘要：%s\n详情: %s\n", alert.Annotations["summary"], alert.Annotations["description"]))
 // 		buffer.WriteString(fmt.Sprintf("开始时间: %s\n\n", alert.StartsAt.Format("2023-12-01 15:04:05")))
 // 	}
-
 // 	return buffer.String()
 // }
